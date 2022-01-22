@@ -1,0 +1,2 @@
+UserParameter=temperature,/home/pi/sensor.py temperature -3
+UserParameter=humidity,/home/pi/sensor.py humidity -3
