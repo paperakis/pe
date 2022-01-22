@@ -1,0 +1,78 @@
+{
+    "zabbix_export": {
+        "version": "5.2",
+        "date": "2022-01-22T21:06:57Z",
+        "groups": [
+            {
+                "name": "Templates/RaspberryPi"
+            }
+        ],
+        "templates": [
+            {
+                "template": "raspberry sensor",
+                "name": "raspberry sensor",
+                "groups": [
+                    {
+                        "name": "Templates/RaspberryPi"
+                    }
+                ],
+                "items": [
+                    {
+                        "name": "Raspberry_Monitor_Humidity",
+                        "key": "humidity",
+                        "delay": "30s",
+                        "value_type": "FLOAT"
+                    },
+                    {
+                        "name": "Raspberry_Monitor_Temperature",
+                        "key": "temperature",
+                        "delay": "30s",
+                        "value_type": "FLOAT",
+                        "triggers": [
+                            {
+                                "expression": "{last()}>40",
+                                "name": "High temperature on {HOST.NAME}",
+                                "priority": "HIGH",
+                                "description": "your temperature sensor if is more that 35\u00b0 the lamp will be red as alert."
+                            },
+                            {
+                                "expression": "{last()}<14",
+                                "name": "Low temperature on {HOST.NAME}",
+                                "priority": "HIGH",
+                                "description": "your temperature sensor if is bellow that 14\u00b0 the lamp will be blue as alert."
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "graphs": [
+            {
+                "name": "graph humidity raspbi",
+                "graph_items": [
+                    {
+                        "sortorder": "1",
+                        "color": "FF0080",
+                        "item": {
+                            "host": "raspberry sensor",
+                            "key": "humidity"
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "graph temp raspbi",
+                "graph_items": [
+                    {
+                        "sortorder": "1",
+                        "color": "FF0080",
+                        "item": {
+                            "host": "raspberry sensor",
+                            "key": "temperature"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
