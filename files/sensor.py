@@ -2,8 +2,6 @@
 
 import RPi.GPIO as GPIO
 import dht11
-# import time
-# import datetime
 import sys
 
 GPIO.setwarnings(False)

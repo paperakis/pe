@@ -2,8 +2,104 @@
 - name: Raspberry deploy as sensor
   hosts: raspberry
   become: true
-  tasks: 
-    pip:
-      executable: pip3
-      name: RPi.GPIO
-      name: dht11
+
+  tasks:
+    - name: Install python3 modules 
+      pip:
+        executable: pip3
+        name: 
+          - RPi.GPIO
+          - dht11
+        
+    - name: copy sensor python script
+      copy:
+        src: files/sensor.py
+        dest: /home/pi/
+
+    - name: ssh key
+      authorized_key:
+        user: pi
+        state: present
+        key: "{{ lookup('file', 'files/sshkey' )}}"
+      tags:
+        - ssh
+
+    - name: download zabbix repo
+      get_url:
+        url: https://repo.zabbix.com/zabbix/5.4/raspbian/pool/main/z/zabbix-release/zabbix-release_5.4-1+debian10_all.deb
+        dest: /tmp/zabbix-release_5.4-1+debian10_all.deb
+      tags:
+        - zabbix
+
+    - name: get update
+      apt:
+        update_cache: yes
+      tags:
+        - zabbix
+
+    - name: install zabbix repo
+      apt:
+        deb: /tmp/zabbix-release_5.4-1+debian10_all.deb
+      tags:
+        - zabbix    
+      
+    - name: Istall zabbix agent2
+      package:
+        name: zabbix-agent2
+        state: present
+      tags:
+        - zabbix
+
+    - name: Add zabbix server to zabbix_agent2.conf
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regexp: '^Server='
+        insertafter: '^Server='
+        state: present
+        line: "Server={{ zabbix_srv }}"
+      tags:
+        - zabbix
+
+    - name: Change the ServerActive to zabbix_agent2.conf
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regexp: '^ServerActive='
+        insertafter: '^ServerActive='
+        state: present
+        line: "ServerActive={{ zabbix_srv }}"
+      tags:
+        - zabbix
+
+    - name: Change the hostname to zabbix_agent2.conf
+      lineinfile:
+        path: /etc/zabbix/zabbix_agent2.conf
+        regexp: '^Hostname='
+        insertafter: '^Hostname='
+        state: present
+        line: "Hostname={{ zabbix_srv }}"
+      tags:
+        - zabbix
+
+    - name: Deploy zabbix user to sudoers.d
+      blockinfile:
+        block: "{{ lookup('file', 'files/zabbix') }}"
+        path: /etc/sudoers.d/zabbix
+        create: yes
+      tags:
+        - zabbix
+
+    - name: Deploy UserParameter
+      blockinfile:
+        block: "{{lookup('file', 'files/userparams.conf')}}"
+        path: /etc/zabbix/zabbix_agent2.d/userparams.conf
+        create: yes
+      tags:
+        - zabbix
+
+    - name: Start zabbix-agent2 service
+      service:
+        name: zabbix-agent2
+        state: started
+        enabled: yes
+      tags:
+        - zabbix
