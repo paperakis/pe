@@ -1,5 +1,5 @@
 ---
-- name: Raspberry deploy as sensor
+- name: Raspberry deploy as thermal sensor
   hosts: raspberry
   become: true
 
@@ -14,7 +14,12 @@
     - name: copy sensor python script
       copy:
         src: files/sensor.py
-        dest: /home/pi/
+        dest: /opt
+        owner: zabbix
+        group: zabbix
+        mode: u=rxw,g=r,o=r
+      tags:
+       - python
 
     - name: ssh key
       authorized_key:
@@ -76,7 +81,7 @@
         regexp: '^Hostname='
         insertafter: '^Hostname='
         state: present
-        line: "Hostname={{ zabbix_srv }}"
+        line: "Hostname={{ inventory_hostname }}"
       tags:
         - zabbix
 

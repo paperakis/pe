@@ -1,2 +1,1 @@
-zabbix ALL=(ALL) NOPASSWD: /opt/temperature.py
-zabbix ALL=(ALL) NOPASSWD: /opt/temperature.sh
+zabbix ALL=(ALL) NOPASSWD: /opt/sensor.py
